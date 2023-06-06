@@ -2,8 +2,15 @@ import argparse
 import os
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--directory', help='Path to your gameReadyAssets directory. Do not use any other directory!', required=True)
+parser.add_argument('-d', '--directory', help='Path to directory', required=True)
+parser.add_argument('-o', '--output', help='Output file name', default='mod.usda')
 args = parser.parse_args()
+
+directory_path = args.directory
+game_ready_assets_path = os.path.join(directory_path)
+
+usda_file_name = args.output
+usda_file_path = os.path.join(game_ready_assets_path, usda_file_name)
 
 directory_path = args.directory
 game_ready_assets_path = os.path.join(directory_path)
@@ -20,8 +27,6 @@ for file_name in os.listdir(game_ready_assets_path):
             if suffix in suffixes:
                 hashes.add(name)
 
-usda_file_name = 'mod.usda'
-usda_file_path = os.path.join(game_ready_assets_path, usda_file_name)
 with open(usda_file_path, 'w') as usda_file:
     usda_file.write(f'''#usda 1.0
 (
