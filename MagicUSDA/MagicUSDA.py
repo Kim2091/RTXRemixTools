@@ -45,12 +45,14 @@ def generate_hashes(file_path):
 
 for file_name in os.listdir(game_ready_assets_path):
     if file_name.endswith('.dds'):
-        if '_' not in file_name:
-            hashes.add(file_name[:-4])
+        name, ext = os.path.splitext(file_name)
+        if '_' not in name:
+            hashes.add(name)
         else:
-            name, suffix = file_name.rsplit('_', 1)
-            if suffix in suffixes:
+            name, suffix = name.rsplit('_', 1)
+            if suffix in suffixes or suffix == 'diffuse':
                 hashes.add(name)
+
 
 with open(usda_file_path, 'w') as usda_file:
     usda_file.write(f'''#usda 1.0
@@ -69,7 +71,12 @@ over "RootNode"
     
     for hash in hashes:
         if args.generate_hashes:
-            hash_value = generate_hashes(os.path.join(game_ready_assets_path, f'{hash}.dds'))
+            if f'{hash}.dds' in os.listdir(game_ready_assets_path):
+                hash_value = generate_hashes(os.path.join(game_ready_assets_path, f'{hash}.dds'))
+            elif f'{hash}_diffuse.dds' in os.listdir(game_ready_assets_path):
+                hash_value = generate_hashes(os.path.join(game_ready_assets_path, f'{hash}_diffuse.dds'))
+            else:
+                hash_value = hash
         else:
             hash_value = hash
         usda_file.write(f'''
@@ -77,6 +84,7 @@ over "RootNode"
         {{
             over "Shader"
             {{''')
+
         
         if f'{hash}.dds' in os.listdir(game_ready_assets_path):
             usda_file.write(f'''
@@ -89,6 +97,18 @@ over "RootNode"
                     doc = "The texture specifying the albedo value and the optional opacity value to use in the alpha channel"
                     hidden = false
                 )''')
+        elif f'{hash}_diffuse.dds' in os.listdir(game_ready_assets_path):
+            usda_file.write(f'''
+                asset inputs:diffuse_texture = @./{hash}_diffuse.dds@ (
+                    customData = {{
+                        asset default = @@
+                    }}
+                    displayGroup = "Diffuse"
+                    displayName = "Albedo Map"
+                    doc = "The texture specifying the albedo value and the optional opacity value to use in the alpha channel"
+                    hidden = false
+                )''')
+
         
         if f'{hash}_emissive.dds' in os.listdir(game_ready_assets_path):
             usda_file.write(f'''
