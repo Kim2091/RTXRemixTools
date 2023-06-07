@@ -1,10 +1,13 @@
 import argparse
 import os
+import xxhash
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--directory', help='Path to directory', required=True)
 parser.add_argument('-o', '--output', help='Output file name', default='mod.usda')
+parser.add_argument('-g', '--generate-hashes', help='Generate hashes for file names', action='store_true')
 args = parser.parse_args()
+
 
 directory_path = args.directory
 game_ready_assets_path = os.path.join(directory_path)
@@ -18,14 +21,38 @@ game_ready_assets_path = os.path.join(directory_path)
 hashes = set()
 suffixes = ['_normal', '_emissive', '_metallic', '_rough']
 
+def generate_hashes(file_path):
+    # Read the file and extract the raw data. Thanks @BlueAmulet!
+    with open(file_path, 'rb') as file:
+        data = file.read()
+        
+    dwHeight = int.from_bytes(data[12:16], "little")
+    dwWidth  = int.from_bytes(data[16:20], "little")
+    pfFlags  = int.from_bytes(data[80:84], "little")
+    pfFourCC = data[84:88]
+    bitCount = int.from_bytes(data[88:92], "little")
+        
+    mipsize = dwWidth*dwHeight
+    if pfFlags & 0x4: # DDPF_FOURCC
+        if pfFourCC == b'DXT1': # DXT1 is 4bpp
+            mipsize //= 2
+    elif pfFlags & 0x20242: # DDPF_ALPHA | DDPF_RGB | DDPF_YUV | DDPF_LUMINANCE
+        mipsize = mipsize*bitCount//8
+        
+    hash_value = xxhash.xxh3_64(data[128:128+mipsize]).hexdigest()
+
+    return hash_value.upper()
+
 for file_name in os.listdir(game_ready_assets_path):
     if file_name.endswith('.dds'):
-        if '_' not in file_name:
-            hashes.add(file_name[:-4])
+        name, ext = os.path.splitext(file_name)
+        if '_' not in name:
+            hashes.add(name)
         else:
-            name, suffix = file_name.rsplit('_', 1)
-            if suffix in suffixes:
+            name, suffix = name.rsplit('_', 1)
+            if suffix in suffixes or suffix == 'diffuse':
                 hashes.add(name)
+
 
 with open(usda_file_path, 'w') as usda_file:
     usda_file.write(f'''#usda 1.0
@@ -42,12 +69,29 @@ over "RootNode"
     over "Looks"
     {{''')
     
+    added_hashes = set()
     for hash in hashes:
+        if args.generate_hashes:
+            if f'{hash}.dds' in os.listdir(game_ready_assets_path):
+                hash_value = generate_hashes(os.path.join(game_ready_assets_path, f'{hash}.dds'))
+            elif f'{hash}_diffuse.dds' in os.listdir(game_ready_assets_path):
+                hash_value = generate_hashes(os.path.join(game_ready_assets_path, f'{hash}_diffuse.dds'))
+            else:
+                hash_value = hash
+        else:
+            hash_value = hash
+
+        if hash_value in added_hashes:
+            continue
+        added_hashes.add(hash_value)
+
         usda_file.write(f'''
-        over "mat_{hash}"
+        over "mat_{hash_value.upper()}"
         {{
             over "Shader"
             {{''')
+
+
         
         if f'{hash}.dds' in os.listdir(game_ready_assets_path):
             usda_file.write(f'''
@@ -60,6 +104,18 @@ over "RootNode"
                     doc = "The texture specifying the albedo value and the optional opacity value to use in the alpha channel"
                     hidden = false
                 )''')
+        elif f'{hash}_diffuse.dds' in os.listdir(game_ready_assets_path):
+            usda_file.write(f'''
+                asset inputs:diffuse_texture = @./{hash}_diffuse.dds@ (
+                    customData = {{
+                        asset default = @@
+                    }}
+                    displayGroup = "Diffuse"
+                    displayName = "Albedo Map"
+                    doc = "The texture specifying the albedo value and the optional opacity value to use in the alpha channel"
+                    hidden = false
+                )''')
+
         
         if f'{hash}_emissive.dds' in os.listdir(game_ready_assets_path):
             usda_file.write(f'''
