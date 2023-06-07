@@ -106,7 +106,7 @@ over "RootNode"
                 )''')
         elif f'{hash}_diffuse.dds' in os.listdir(game_ready_assets_path):
             usda_file.write(f'''
-                asset inputs:diffuse_texture = @./"{hash}"_diffuse.dds@ (
+                asset inputs:diffuse_texture = @./{hash}_diffuse.dds@ (
                     customData = {{
                         asset default = @@
                     }}
@@ -119,7 +119,7 @@ over "RootNode"
         
         if f'{hash}_emissive.dds' in os.listdir(game_ready_assets_path):
             usda_file.write(f'''
-                asset inputs:emissive_mask_texture = @./"{hash}"_emissive.dds@ (
+                asset inputs:emissive_mask_texture = @./{hash}_emissive.dds@ (
                     colorSpace = "auto"
                     customData = {{
                         asset default = @@
@@ -157,7 +157,7 @@ over "RootNode"
         
         if f'{hash}_metallic.dds' in os.listdir(game_ready_assets_path):
             usda_file.write(f'''
-                asset inputs:metallic_texture = @./"{hash}"_metallic.dds@ (
+                asset inputs:metallic_texture = @./{hash}_metallic.dds@ (
                     colorSpace = "auto"
                     customData = {{
                         asset default = @@
@@ -169,11 +169,11 @@ over "RootNode"
         
         if f'{hash}_normal.dds' in os.listdir(game_ready_assets_path):
             usda_file.write(f'''
-                asset inputs:normalmap_texture = @./"{hash}"_normal.dds@''')
+                asset inputs:normalmap_texture = @./{hash}_normal.dds@''')
         
         if f'{hash}_rough.dds' in os.listdir(game_ready_assets_path):
             usda_file.write(f'''
-                asset inputs:reflectionroughness_texture = @./"{hash}"_rough.dds@ (
+                asset inputs:reflectionroughness_texture = @./{hash}_rough.dds@ (
                     colorSpace = "auto"
                     customData = {{
                         asset default = @@
