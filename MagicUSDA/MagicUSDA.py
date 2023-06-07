@@ -69,6 +69,7 @@ over "RootNode"
     over "Looks"
     {{''')
     
+    added_hashes = set()
     for hash in hashes:
         if args.generate_hashes:
             if f'{hash}.dds' in os.listdir(game_ready_assets_path):
@@ -79,11 +80,17 @@ over "RootNode"
                 hash_value = hash
         else:
             hash_value = hash
+
+        if hash_value in added_hashes:
+            continue
+        added_hashes.add(hash_value)
+
         usda_file.write(f'''
         over "mat_{hash_value.upper()}"
         {{
             over "Shader"
             {{''')
+
 
         
         if f'{hash}.dds' in os.listdir(game_ready_assets_path):
