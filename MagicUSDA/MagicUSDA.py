@@ -7,7 +7,7 @@ parser.add_argument('-d', '--directory', help='Path to directory', required=True
 parser.add_argument('-o', '--output', help='Output file name', default='mod')
 parser.add_argument('-g', '--generate-hashes', help='Generate hashes for file names', action='store_true')
 parser.add_argument('-m', '--multiple-files', help='Save multiple .usda files, one for each suffix type (except for diffuse)', action='store_true')
-parser.add_argument('-add', '--add-sublayers', action='store_true', help='Add sublayers made with -m to the mod.usda file. This argument only modifies the mod.usda file and does not affect any custom USDA file specified by the -o argument.')
+parser.add_argument('-a', '--add-sublayers', action='store_true', help='Add sublayers made with -m to the mod.usda file. This argument only modifies the mod.usda file and does not affect any custom USDA file specified by the -o argument.')
 args = parser.parse_args()
 
 directory_path = args.directory
