@@ -7,6 +7,7 @@ parser.add_argument('-d', '--directory', help='Path to directory', required=True
 parser.add_argument('-o', '--output', help='Output file name', default='mod')
 parser.add_argument('-g', '--generate-hashes', help='Generate hashes for file names', action='store_true')
 parser.add_argument('-m', '--multiple-files', help='Save multiple .usda files, one for each suffix type (except for diffuse)', action='store_true')
+parser.add_argument('-a', '--add-sublayers', action='store_true', help='Add sublayers made with -m to the mod.usda file. This argument only modifies the mod.usda file and does not affect any custom USDA file specified by the -o argument.')
 args = parser.parse_args()
 
 directory_path = args.directory
@@ -192,6 +193,42 @@ over "RootNode"
     }
 }
 ''')
+
+def add_sublayers():
+    mod_file_name = 'mod.usda'
+    mod_file_path = os.path.join(game_ready_assets_path, mod_file_name)
+    if os.path.exists(mod_file_path):
+        with open(mod_file_path, 'r') as mod_file:
+            mod_file_content = mod_file.read()
+            sublayer_start = mod_file_content.find('subLayers = [')
+            if sublayer_start != -1:
+                sublayer_end = mod_file_content.find(']', sublayer_start)
+                existing_sublayers = mod_file_content[sublayer_start+len('subLayers = ['):sublayer_end].split('\n')
+                existing_sublayers = [sublayer.strip().rstrip(',') for sublayer in existing_sublayers if sublayer.strip()]
+                new_sublayers = [f'@./{args.output}{suffix}.usda@' for suffix in suffixes if f'@./{args.output}{suffix}.usda@' not in existing_sublayers]
+                if new_sublayers:
+                    sublayers = ',\n        '.join(existing_sublayers + new_sublayers)
+                    mod_file_content = mod_file_content[:sublayer_start+len('subLayers = [')] + f'\n        {sublayers}\n    ' + mod_file_content[sublayer_end:]
+                    with open(mod_file_path, 'w') as mod_file:
+                        mod_file.write(mod_file_content)
+            else:
+                sublayers = ',\n        '.join([f'@./{args.output}{suffix}.usda@' for suffix in suffixes])
+                with open(mod_file_path, 'w') as mod_file:
+                    mod_file.write(f'''#usda 1.0
+(
+    subLayers = [
+        {sublayers}
+    ]
+)
+
+{mod_file_content}''')
+
+
+
+
+
+if args.add_sublayers:
+    add_sublayers()
 
 if args.multiple_files:
     for suffix in suffixes:
