@@ -7,7 +7,7 @@ parser.add_argument('-d', '--directory', help='Path to directory', required=True
 parser.add_argument('-o', '--output', help='Output file name', default='mod')
 parser.add_argument('-g', '--generate-hashes', help='Generate hashes for file names', action='store_true')
 parser.add_argument('-m', '--multiple-files', help='Save multiple .usda files, one for each suffix type (except for diffuse)', action='store_true')
-parser.add_argument('-a', '--add-sublayers', action='store_true', help='Add sublayers made with -m to the mod.usda file. This argument only modifies the mod.usda file and does not affect any custom USDA file specified by the -o argument.')
+parser.add_argument('-add', '--add-sublayers', action='store_true', help='Add sublayers made with -m to the mod.usda file. This argument only modifies the mod.usda file and does not affect any custom USDA file specified by the -o argument.')
 args = parser.parse_args()
 
 directory_path = args.directory
@@ -37,9 +37,17 @@ def generate_hashes(file_path):
 
     return hash_value.upper()
 
+created_files = []
+modified_files = []
+
 def write_usda_file(suffix=None):
     usda_file_name = f'{args.output}{suffix if suffix else ""}.usda'
     usda_file_path = os.path.join(game_ready_assets_path, usda_file_name)
+
+    if os.path.exists(usda_file_path):
+        modified_files.append(usda_file_path)
+    else:
+        created_files.append(usda_file_path)
 
     hashes = set()
     
@@ -198,6 +206,7 @@ def add_sublayers():
     mod_file_name = 'mod.usda'
     mod_file_path = os.path.join(game_ready_assets_path, mod_file_name)
     if os.path.exists(mod_file_path):
+        modified_files.append(mod_file_path)
         with open(mod_file_path, 'r') as mod_file:
             mod_file_content = mod_file.read()
             sublayer_start = mod_file_content.find('subLayers = [')
@@ -223,10 +232,6 @@ def add_sublayers():
 
 {mod_file_content}''')
 
-
-
-
-
 if args.add_sublayers:
     add_sublayers()
 
@@ -235,3 +240,11 @@ if args.multiple_files:
         write_usda_file(suffix)
 else:
     write_usda_file()
+
+print("Finished!")
+print("Created files:")
+for file in created_files:
+    print(f"  - {file}")
+print("Modified files:")
+for file in modified_files:
+    print(f"  - {file}")
