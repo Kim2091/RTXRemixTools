@@ -8,6 +8,7 @@ There are some additional functions:
 * `-o` - This allows you to change the output usda file names
 * `-m` - This setting will split your output USDA files into separate entries, such as `mod_emissive.usda` and `mod_metallic.usda`. This command works in conjunction with `-o` if desired, changing the "mod" in `mod_emissive.usda`
 * `-g` - This enables hash generation for your texture names. The purpose of this one is to work with extracted game textures, where you can dump the textures right from the game files. This only works if the game textures are IDENTICAL to the ones Remix dumps
+* `-a` - This argument adds sublayers made with the `-m` argument to the `mod.usda` file. This argument only modifies the `mod.usda` file and does not affect any custom `.usda` file specified by the `-o` argument. It works in conjunction with the `-m` and `-o` arguments to add sublayers to the `mod.usda` file for each map type (emissive, normal, etc.).
 
 This is a script to generate `.usda` files from your gameReadyAssets folder. It detects any of these map types in your folder:
 - emissive
