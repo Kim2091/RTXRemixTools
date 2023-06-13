@@ -211,7 +211,7 @@ over "RootNode"
             }''')
         
         usda_file.write('''
-        }
+        
     }
 }
 ''')
