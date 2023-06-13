@@ -41,6 +41,16 @@ created_files = []
 modified_files = []
 
 def write_usda_file(suffix=None):
+    # Check if there are any texture files with the specified suffix
+    if suffix:
+        has_suffix_files = False
+        for file_name in os.listdir(game_ready_assets_path):
+            if file_name.endswith(f'{suffix}.dds'):
+                has_suffix_files = True
+                break
+        if not has_suffix_files:
+            return
+
     usda_file_name = f'{args.output}{suffix if suffix else ""}.usda'
     usda_file_path = os.path.join(game_ready_assets_path, usda_file_name)
 
@@ -78,6 +88,10 @@ over "RootNode"
         
         added_hashes = set()
         for hash in hashes:
+            # Check if there is a corresponding texture file for the specified suffix
+            if suffix and not any(file_name.endswith(f'{hash}{suffix}.dds') for file_name in os.listdir(game_ready_assets_path)):
+                continue
+
             if args.generate_hashes:
                 if f'{hash}.dds' in os.listdir(game_ready_assets_path):
                     hash_value = generate_hashes(os.path.join(game_ready_assets_path, f'{hash}.dds'))
