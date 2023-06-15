@@ -107,114 +107,113 @@ over "RootNode"
             added_hashes.add(hash_value)
 
             usda_file.write(f'''
-            over "mat_{hash_value.upper()}"
-            {{
-                over "Shader"
-                {{''')
+        over "mat_{hash_value.upper()}"
+        {{
+            over "Shader"
+            {{''')
+
 
             if not suffix or suffix == '_diffuse':
                 if f'{hash}.dds' in os.listdir(game_ready_assets_path):
                     usda_file.write(f'''
-                        asset inputs:diffuse_texture = @./{hash}.dds@ (
-                            customData = {{
-                                asset default = @@
-                            }}
-                            displayGroup = "Diffuse"
-                            displayName = "Albedo Map"
-                            doc = "The texture specifying the albedo value and the optional opacity value to use in the alpha channel"
-                            hidden = false
-                        )''')
+                asset inputs:diffuse_texture = @./{hash}.dds@ (
+                    customData = {{
+                        asset default = @@
+                    }}
+                    displayGroup = "Diffuse"
+                    displayName = "Albedo Map"
+                    doc = "The texture specifying the albedo value and the optional opacity value to use in the alpha channel"
+                    hidden = false
+                )''')
+
                 elif f'{hash}_diffuse.dds' in os.listdir(game_ready_assets_path):
                     usda_file.write(f'''
-                        asset inputs:diffuse_texture = @./{hash}_diffuse.dds@ (
-                            customData = {{
-                                asset default = @@
-                            }}
-                            displayGroup = "Diffuse"
-                            displayName = "Albedo Map"
-                            doc = "The texture specifying the albedo value and the optional opacity value to use in the alpha channel"
-                            hidden = false
-                        )''')
+                asset inputs:diffuse_texture = @./{hash}_diffuse.dds@ (
+                    customData = {{
+                        asset default = @@
+                    }}
+                    displayGroup = "Diffuse"
+                    displayName = "Albedo Map"
+                    doc = "The texture specifying the albedo value and the optional opacity value to use in the alpha channel"
+                    hidden = false
+                )''')
 
             if not suffix or suffix == '_emissive':
                 if f'{hash}_emissive.dds' in os.listdir(game_ready_assets_path):
                     usda_file.write(f'''
-                        asset inputs:emissive_mask_texture = @./{hash}_emissive.dds@ (
-                            colorSpace = "auto"
-                            customData = {{
-                                asset default = @@
-                            }}
-                            displayGroup = "Emissive"
-                            displayName = "Emissive Mask Map"
-                            doc = "The texture masking the emissive color"
-                            hidden = false
-                        )
-                        bool inputs:enable_emission = 1 (
-                            customData = {{
-                                bool default = 0
-                            }}
-                            displayGroup = "Emissive"
-                            displayName = "Enable Emission"
-                            doc = "Enables the emission of light from the material"
-                            hidden = false
-                        )
-                        float inputs:emissive_intensity = 5 (
-                            customData = {{
-                                float default = 40
-                                dictionary range = {{
-                                    float max = 65504
-                                    float min = 0
-                                }}
-                            }}
-                            displayGroup = "Emissive"
-                            displayName = "Emissive Intensity"
-                            doc = "Intensity of the emission"
-                            hidden = false
-                        )''')
-
-            usda_file.write('''
-                    int inputs:encoding = 0''')
+                asset inputs:emissive_mask_texture = @./{hash}_emissive.dds@ (
+                    colorSpace = "auto"
+                    customData = {{
+                        asset default = @@
+                    }}
+                    displayGroup = "Emissive"
+                    displayName = "Emissive Mask Map"
+                    doc = "The texture masking the emissive color"
+                    hidden = false
+                )
+                bool inputs:enable_emission = 1 (
+                    customData = {{
+                        bool default = 0
+                    }}
+                    displayGroup = "Emissive"
+                    displayName = "Enable Emission"
+                    doc = "Enables the emission of light from the material"
+                    hidden = false
+                )
+                float inputs:emissive_intensity = 5 (
+                    customData = {{
+                        float default = 40
+                        dictionary range = {{
+                            float max = 65504
+                            float min = 0
+                        }}
+                    }}
+                    displayGroup = "Emissive"
+                    displayName = "Emissive Intensity"
+                    doc = "Intensity of the emission"
+                    hidden = false
+                )''')
 
             if not suffix or suffix == '_metallic':
                 if f'{hash}_metallic.dds' in os.listdir(game_ready_assets_path):
                     usda_file.write(f'''
-                        asset inputs:metallic_texture = @./{hash}_metallic.dds@ (
-                            colorSpace = "auto"
-                            customData = {{
-                                asset default = @@
-                            }}
-                            displayGroup = "Specular"
-                            displayName = "Metallic Map"
-                            hidden = false
-                        )''')
+                asset inputs:metallic_texture = @./{hash}_metallic.dds@ (
+                    colorSpace = "auto"
+                    customData = {{
+                        asset default = @@
+                    }}
+                    displayGroup = "Specular"
+                    displayName = "Metallic Map"
+                    hidden = false
+                )''')
 
             if not suffix or suffix == '_normal':
                 if f'{hash}_normal.dds' in os.listdir(game_ready_assets_path):
                     usda_file.write(f'''
-                        asset inputs:normalmap_texture = @./{hash}_normal.dds@''')
+                asset inputs:normalmap_texture = @./{hash}_normal.dds@''')
 
             if not suffix or suffix == '_rough':
                 if f'{hash}_rough.dds' in os.listdir(game_ready_assets_path):
                     usda_file.write(f'''
-                        asset inputs:reflectionroughness_texture = @./{hash}_rough.dds@ (
-                            colorSpace = "auto"
-                            customData = {{
-                                asset default = @@
-                            }}
-                            displayGroup = "Specular"
-                            displayName = "Roughness Map"
-                            hidden = false
-                        )''')
+                asset inputs:reflectionroughness_texture = @./{hash}_rough.dds@ (
+                    colorSpace = "auto"
+                    customData = {{
+                        asset default = @@
+                    }}
+                    displayGroup = "Specular"
+                    displayName = "Roughness Map"
+                    hidden = false
+                )''')
             
             usda_file.write('''
-                }
-            }''')
+            }
+        }''')
         
         usda_file.write('''
-        
     }
 }
 ''')
+
 
 def add_sublayers():
     mod_file_name = 'mod.usda'
@@ -228,14 +227,14 @@ def add_sublayers():
                 sublayer_end = mod_file_content.find(']', sublayer_start)
                 existing_sublayers = mod_file_content[sublayer_start+len('subLayers = ['):sublayer_end].split('\n')
                 existing_sublayers = [sublayer.strip().rstrip(',') for sublayer in existing_sublayers if sublayer.strip()]
-                new_sublayers = [f'@./{args.output}{suffix}.usda@' for suffix in suffixes if f'@./{args.output}{suffix}.usda@' not in existing_sublayers]
+                new_sublayers = [f'@./{args.output}{suffix}.usda@' for suffix in suffixes if f'@./{args.output}{suffix}.usda@' not in existing_sublayers and os.path.exists(os.path.join(game_ready_assets_path, f'{args.output}{suffix}.usda'))]
                 if new_sublayers:
                     sublayers = ',\n        '.join(existing_sublayers + new_sublayers)
                     mod_file_content = mod_file_content[:sublayer_start+len('subLayers = [')] + f'\n        {sublayers}\n    ' + mod_file_content[sublayer_end:]
                     with open(mod_file_path, 'w') as mod_file:
                         mod_file.write(mod_file_content)
             else:
-                sublayers = ',\n        '.join([f'@./{args.output}{suffix}.usda@' for suffix in suffixes])
+                sublayers = ',\n        '.join([f'@./{args.output}{suffix}.usda@' for suffix in suffixes if os.path.exists(os.path.join(game_ready_assets_path, f'{args.output}{suffix}.usda'))])
                 with open(mod_file_path, 'w') as mod_file:
                     mod_file.write(f'''#usda 1.0
 (
