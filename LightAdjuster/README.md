@@ -1,7 +1,10 @@
-**Remix Light Adjuster**
+# **Remix Light Adjuster**
+
 *Written with the assistance of Bing*
 
-This script adjusts the intensity and/or color temperature values in a file.
+This script adjusts the intensity and/or color temperature values in a file. 
+
+$\color{#f7d26a}{\textsf{Please back up your usda files before running!}}$
 
 ## Usage
 
