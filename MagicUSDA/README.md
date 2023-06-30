@@ -1,6 +1,8 @@
 ## Remix USDA Generator
 *Written with the assistance of Bing*
 
+$\color{#f7d26a}{\textsf{Please back up your usda files before running!}}$
+
 How to use this script:
 `python MagicUSDA.py -d path\to\gameReadyAssets`
 
