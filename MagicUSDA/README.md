@@ -17,7 +17,7 @@ There are some additional functions:
 
 * `-o` - Change the output usda file names.
 * `-m` - Split the output USDA files into separate entries for each map type (e.g. mod_emissive.usda, mod_metallic.usda). Works with `-o` to change the base file name.
-* `-a` - Add sublayers made with `-m` to the mod.usda file. Only modifies mod.usda, not custom files specified by `-o`. Works with `-m` and `-o`.
+* `-a` - Add sublayers made with `-m` to the mod.usda file. Not compatible with custom files specified by `-o`, will only modify mod.usda. Works with `-m` and `-o`.
 * `-g` - Toggle generating hashes for file names before the suffix. Useful for files with generic names like test.dds. Diffuse textures must be identical to Remix dumps.
 * `-e` - Exclude files without a hash from the output .usda file (e.g. test.dds).
 * `-r` - Specify a separate folder to use as a reference for generating diffuse texture hashes. Searches for files in the reference directory based on file names from the base directory. If not provided, uses the main directory to generate hashes. Useful with folders like captures or game texture rips.
