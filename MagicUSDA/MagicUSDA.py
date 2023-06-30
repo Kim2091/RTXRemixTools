@@ -57,16 +57,20 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
         created_files.append(usda_file_path)
 
     targets = {}
+    
+    reference_directory = args.reference_directory if args.reference_directory else args.directory
+    
     for file_name in file_list:
         if file_name.endswith(".dds"):
             name, ext = os.path.splitext(file_name)
             if "_" not in name or name.endswith("_diffuse"):
-                # Check if the skip_hash_generation argument is specified
-                if not args.skip_hash_generation:
-                    key = generate_hashes(os.path.join(game_ready_assets_path, file_name))
+                # Check if the generate_hashes argument is specified
+                if args.generate_hashes:
+                    key = generate_hashes(os.path.join(reference_directory, file_name))
                 else:
                     key = name
                 targets[key] = name
+
 
     # Create a new stage
     stage = Usd.Stage.CreateNew(usda_file_path)
@@ -201,16 +205,16 @@ def add_sublayers(args, file_list) -> list:
 
     return modified_files
 
-
 if __name__ == "__main__":
     ## ARGUMENT BLOCK
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--directory", required=True, help="Path to directory")
     parser.add_argument("-o", "--output", default="mod", help="Output file name")
     parser.add_argument("-e", "--exclude-non-hashes", action="store_true", help="Exclude any files without a hash from being included in the output .usda file")
-    parser.add_argument("-s", "--skip-hash-generation", action="store_true", help="Skip generating hashes for texture files")
+    parser.add_argument("-g", "--generate-hashes", action="store_true", help="Generates hashes for file names before the suffix")
     parser.add_argument("-m", "--multiple-files", action="store_true", help="Save multiple .usda files, one for each suffix type (except for diffuse)")
     parser.add_argument("-a", "--add-sublayers", action="store_true", help="Add sublayers made with -m to the mod.usda file. This argument only modifies the mod.usda file and does not affect any custom USDA file specified by the -o argument.")
+    parser.add_argument("-r", "--reference-directory", help="Path to reference directory for diffuse texture hashes")
     args = parser.parse_args()
      
     # Check target processing directory before use
@@ -242,4 +246,3 @@ if __name__ == "__main__":
     print("Modified files:")
     for file in modified_files:
         print(f"  - {file}")
-
