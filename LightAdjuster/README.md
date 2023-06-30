@@ -7,7 +7,7 @@ This script adjusts the intensity and/or color temperature values in a file.
 
 To use this script, run the following command:
 
-`python adjust_file.py file_path`
+`python LightAdjuster.py file_path`
 
 where `file_path` is the path to the .usda file to modify.
 
