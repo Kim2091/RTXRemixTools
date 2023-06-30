@@ -1,12 +1,15 @@
-## Remix USDA Generator
+# Remix USDA Generator
 *Written with the assistance of Bing and ChatGPT*
+
+$\color{#f7d26a}{\textsf{Please back up your usda files before running!}}$
 
 This is a script to generate `.usda` files from your gameReadyAssets folder. It detects any of these map types in your folder:
 - emissive
 - normal
 - metallic
 - rough
-  
+
+## Usage
 How to use this script:
 `python MagicUSDA.py -d path\to\gameReadyAssets`
 
