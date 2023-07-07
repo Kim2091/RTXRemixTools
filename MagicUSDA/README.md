@@ -1,7 +1,7 @@
 # Remix USDA Generator
 *Written with the assistance of Bing and ChatGPT*
 
-$\color{#f7d26a}{\textsf{Please back up your usda files before running!}}$
+$\color{#f7d26a}{\textsf{Please back up your usda files to a separate folder before running!}}$
 
 This is a script to generate `.usda` files from your gameReadyAssets folder. It detects any of these map types in your folder:
 - emissive
