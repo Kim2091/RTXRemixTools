@@ -93,7 +93,6 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
     # Add a Looks scope as a child of the RootNode prim
     looks_scope = UsdGeom.Scope.Define(stage, "/RootNode/Looks")
     
-    
     added_targets = set()
     for value, name in targets.items():
         # We only want to generate materials for inputs that are hashes in this mode
@@ -137,7 +136,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
         if not suffix or suffix == "_emissive":
             emissive_file_name = f"{value}_emissive.dds"
             print(f"Emissive File Name: {emissive_file_name in file_list}")
-            print(file_list)
+            #print(file_list)
             if any(file_path.endswith(emissive_file_name) for file_path in file_list):
                 emissive_mask_texture = shader_prim.CreateInput(
                     "emissive_mask_texture", Sdf.ValueTypeNames.Asset
@@ -223,8 +222,11 @@ def add_sublayers(args, file_list) -> list:
         new_sublayers = [
             f"./{args.output}{suffix}.usda"
             for suffix in suffixes
-                if  f"{args.output}{suffix}.usda" not in existing_sublayer_files
-                and f"{args.output}{suffix}.usda" in     file_list
+            if f"{args.output}{suffix}.usda" not in existing_sublayer_files
+            and any(
+                os.path.basename(file_path) == f"{args.output}{suffix}.usda"
+                for file_path in file_list
+            )
         ]
         stage.GetRootLayer().subLayerPaths = (existing_sublayers + new_sublayers)
 
@@ -232,6 +234,7 @@ def add_sublayers(args, file_list) -> list:
         stage.Save()
 
     return modified_files
+
 
 if __name__ == "__main__":
     ## ARGUMENT BLOCK
@@ -258,6 +261,7 @@ if __name__ == "__main__":
     modified_files = []
     
     # Process sublayer additions
+    print(f"Add Sublayers: {args.add_sublayers}")
     if args.add_sublayers:
         modified_files.extend(add_sublayers(args, file_list))
     
