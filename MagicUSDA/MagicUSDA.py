@@ -1,8 +1,10 @@
-import os, argparse
+import os
+import argparse
 import xxhash
 from pxr import Usd, UsdGeom, UsdShade, Sdf
 
 suffixes = ["_normal", "_emissive", "_metallic", "_rough"]
+
 
 def generate_hashes(file_path) -> str:
     # Read the file and extract the raw data. Thanks @BlueAmulet!
@@ -33,17 +35,10 @@ def generate_hashes(file_path) -> str:
 
 
 def write_usda_file(args, file_list, suffix=None) -> [list, list]:
-    created_files  = []
+    created_files = []
     modified_files = []
     game_ready_assets_path = os.path.join(args.directory)
-    
-    # Get the current working directory
-    cwd = os.getcwd()
-    # Get the common prefix between the current working directory and the game ready assets path
-    common_prefix = os.path.commonprefix([cwd, game_ready_assets_path])
-    # Get the relative path from the current working directory to the game ready assets path
-    rel_path = os.path.relpath(game_ready_assets_path, common_prefix)
-    
+
     # Check if there are any texture files with the specified suffix
     if suffix:
         has_suffix_files = False
@@ -64,7 +59,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
         created_files.append(usda_file_path)
 
     targets = {}
-    
+
     reference_directory = args.reference_directory if args.reference_directory else args.directory
     
     for file_name in file_list:
@@ -86,7 +81,6 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
                 # Get the relative path from the game ready assets path to the texture file
                 rel_file_path = os.path.relpath(file_name, args.directory)
                 targets[key] = rel_file_path
-
 
     # Create a new stage
     stage = Usd.Stage.CreateNew(usda_file_path)
@@ -135,7 +129,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
         if not suffix or suffix == "_emissive":
             emissive_file_name = f"{value}_emissive.dds"
             print(f"Emissive File Name: {emissive_file_name in file_list}")
-            #print(file_list)
+            # print(file_list)
             if any(file_path.endswith(emissive_file_name) for file_path in file_list):
                 emissive_mask_texture = shader_prim.CreateInput(
                     "emissive_mask_texture", Sdf.ValueTypeNames.Asset
@@ -199,6 +193,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
     
     return [modified_files, created_files]
 
+
 def add_sublayers(args, file_list) -> list:
     modified_files = []
     game_ready_assets_path = os.path.join(args.directory)
@@ -236,7 +231,7 @@ def add_sublayers(args, file_list) -> list:
 
 
 if __name__ == "__main__":
-    ## ARGUMENT BLOCK
+    # ARGUMENT BLOCK
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--directory", required=True, help="Path to directory")
     parser.add_argument("-o", "--output", default="mod", help="Output file name")
