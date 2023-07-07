@@ -36,7 +36,14 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
     created_files  = []
     modified_files = []
     game_ready_assets_path = os.path.join(args.directory)
-
+    
+    # Get the current working directory
+    cwd = os.getcwd()
+    # Get the common prefix between the current working directory and the game ready assets path
+    common_prefix = os.path.commonprefix([cwd, game_ready_assets_path])
+    # Get the relative path from the current working directory to the game ready assets path
+    rel_path = os.path.relpath(game_ready_assets_path, common_prefix)
+    
     # Check if there are any texture files with the specified suffix
     if suffix:
         has_suffix_files = False
@@ -62,15 +69,20 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
     
     for file_name in file_list:
         if file_name.endswith(".dds"):
-            name, ext = os.path.splitext(file_name)
+            # Extract only the file name from the absolute path
+            name = os.path.basename(file_name)
+            name, ext = os.path.splitext(name)
             if "_" not in name or name.endswith("_diffuse"):
                 # Check if the generate_hashes argument is specified
                 if args.generate_hashes:
                     key = generate_hashes(os.path.join(reference_directory, file_name))
                 else:
-                    key = name
-                targets[key] = name
-
+                    key = os.path.basename(name)
+                # Remove the _diffuse suffix from the key
+                key = key.replace("_diffuse", "")
+                # Get the relative path from the game ready assets path to the texture file
+                rel_file_path = os.path.relpath(file_name, args.directory)
+                targets[key] = rel_file_path
 
     # Create a new stage
     stage = Usd.Stage.CreateNew(usda_file_path)
@@ -80,6 +92,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
 
     # Add a Looks scope as a child of the RootNode prim
     looks_scope = UsdGeom.Scope.Define(stage, "/RootNode/Looks")
+    
     
     added_targets = set()
     for value, name in targets.items():
@@ -117,16 +130,21 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
             diffuse_texture = shader_prim.CreateInput(
                 "diffuse_texture", Sdf.ValueTypeNames.Asset
             )
-            diffuse_texture.Set(f"./{name}.dds")
+            # Use the dynamically generated relative path for the diffuse texture
+            diffuse_texture.Set(f".\{rel_file_path}")
         
         # Process each type of texture
         if not suffix or suffix == "_emissive":
             emissive_file_name = f"{value}_emissive.dds"
-            if emissive_file_name in file_list:
+            print(f"Emissive File Name: {emissive_file_name in file_list}")
+            print(file_list)
+            if any(file_path.endswith(emissive_file_name) for file_path in file_list):
                 emissive_mask_texture = shader_prim.CreateInput(
                     "emissive_mask_texture", Sdf.ValueTypeNames.Asset
                 )
-                emissive_mask_texture.Set(f"./{emissive_file_name}")
+                # Use the dynamically generated relative path for the emissive texture
+                emissive_rel_file_path = os.path.relpath(os.path.join(game_ready_assets_path, emissive_file_name), args.directory)
+                emissive_mask_texture.Set(f".\{emissive_rel_file_path}")
                 enable_emission = shader_prim.CreateInput(
                     "enable_emission", Sdf.ValueTypeNames.Bool
                 )
@@ -137,25 +155,35 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
                 emissive_intensity.Set(5)
 
         if not suffix or suffix == "_metallic":
-            if f"{name}_metallic.dds" in file_list:
+            metallic_file_name = f"{value}_metallic.dds"
+            if any(file_path.endswith(metallic_file_name) for file_path in file_list):
+
                 metallic_texture = shader_prim.CreateInput(
                     "metallic_texture", Sdf.ValueTypeNames.Asset
                 )
-                metallic_texture.Set(f"./{name}_metallic.dds")
+                # Use the dynamically generated relative path for the metallic texture
+                metallic_rel_file_path = os.path.relpath(os.path.join(game_ready_assets_path, metallic_file_name), args.directory)
+                metallic_texture.Set(f".\{metallic_rel_file_path}")
 
         if not suffix or suffix == "_normal":
-            if f"{name}_normal.dds" in file_list:
+            normal_file_name = f"{value}_normal.dds"
+            if any(file_path.endswith(normal_file_name) for file_path in file_list):
                 normalmap_texture = shader_prim.CreateInput(
                     "normal_texture", Sdf.ValueTypeNames.Asset
                 )
-                normalmap_texture.Set(f"./{name}_normal.dds")
+                # Use the dynamically generated relative path for the normal texture
+                normal_rel_file_path = os.path.relpath(os.path.join(game_ready_assets_path, normal_file_name), args.directory)
+                normalmap_texture.Set(f".\{normal_rel_file_path}")
 
         if not suffix or suffix == "_rough":
-            if f"{name}_rough.dds" in file_list:
+            roughness_file_name = f"{value}_rough.dds"
+            if any(file_path.endswith(roughness_file_name) for file_path in file_list):
                 reflectionroughness_texture = shader_prim.CreateInput(
                     "roughness_texture", Sdf.ValueTypeNames.Asset
                 )
-                reflectionroughness_texture.Set(f"./{name}_rough.dds")
+                # Use the dynamically generated relative path for the roughness texture
+                roughness_rel_file_path = os.path.relpath(os.path.join(game_ready_assets_path, roughness_file_name), args.directory)
+                reflectionroughness_texture.Set(f".\{roughness_rel_file_path}")
 
         # Connect shader output to material inputs
         material_prim.CreateInput(
@@ -221,7 +249,11 @@ if __name__ == "__main__":
     if not os.path.isdir(args.directory):
         raise FileNotFoundError("Specified processing directory (-d) is invalid")
     
-    file_list = os.listdir(os.path.join(args.directory))
+    # Recursively scan folders
+    file_list = []
+    for root, dirs, files in os.walk(args.directory):
+        for file in files:
+            file_list.append(os.path.join(root, file))
     created_files  = []
     modified_files = []
     
