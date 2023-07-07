@@ -101,7 +101,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
             continue
         else:
             added_targets.add(value)
-            print(f"Adding: {value}, {name}")
+            print(f"Adding texture {name} with hash: {value}")
 
         # Add a material prim as a child of the Looks scope
         material_prim = UsdShade.Material.Define(
@@ -123,18 +123,19 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
                 "diffuse_texture", Sdf.ValueTypeNames.Asset
             )
             # Use the dynamically generated relative path for the diffuse texture
-            diffuse_texture.Set(f".\{rel_file_path}")
+            diffuse_texture.Set(f".\{name}")
         
         # Process each type of texture
         if not suffix or suffix == "_emissive":
             emissive_file_name = f"{value}_emissive.dds"
-            print(f"Emissive File Name: {emissive_file_name in file_list}")
+            # print(f"Emissive File Name: {emissive_file_name in file_list}")
             # print(file_list)
             if any(file_path.endswith(emissive_file_name) for file_path in file_list):
                 emissive_mask_texture = shader_prim.CreateInput(
                     "emissive_mask_texture", Sdf.ValueTypeNames.Asset
                 )
                 # Use the dynamically generated relative path for the emissive texture
+
                 emissive_rel_file_path = os.path.relpath(os.path.join(os.path.dirname(file_name), emissive_file_name), args.directory)
                 emissive_mask_texture.Set(f".\{emissive_rel_file_path}")
                 enable_emission = shader_prim.CreateInput(
