@@ -78,11 +78,15 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
                     key = generate_hashes(os.path.join(reference_directory, file_name))
                 else:
                     key = os.path.basename(name)
+                    # Check if the key contains a hash
+                    if not (key.isupper() and len(key) == 16):
+                        continue
                 # Remove the _diffuse suffix from the key
                 key = key.replace("_diffuse", "")
                 # Get the relative path from the game ready assets path to the texture file
                 rel_file_path = os.path.relpath(file_name, args.directory)
                 targets[key] = rel_file_path
+
 
     # Create a new stage
     stage = Usd.Stage.CreateNew(usda_file_path)
@@ -95,11 +99,6 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
     
     added_targets = set()
     for value, name in targets.items():
-        # We only want to generate materials for inputs that are hashes in this mode
-        if args.exclude_non_hashes:
-            if not name.isupper() and not len(name) == 16:
-                continue
-
         # Check if there is a corresponding texture file for the specified suffix
         if suffix and not any(
             file_name.endswith(f"{value}{suffix}.dds") for file_name in file_list
@@ -241,7 +240,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--directory", required=True, help="Path to directory")
     parser.add_argument("-o", "--output", default="mod", help="Output file name")
-    parser.add_argument("-e", "--exclude-non-hashes", action="store_true", help="Exclude any files without a hash from being included in the output .usda file")
     parser.add_argument("-g", "--generate-hashes", action="store_true", help="Generates hashes for file names before the suffix")
     parser.add_argument("-m", "--multiple-files", action="store_true", help="Save multiple .usda files, one for each suffix type (except for diffuse)")
     parser.add_argument("-a", "--add-sublayers", action="store_true", help="Add sublayers made with -m to the mod.usda file. This argument only modifies the mod.usda file and does not affect any custom USDA file specified by the -o argument.")
