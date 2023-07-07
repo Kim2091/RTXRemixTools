@@ -135,7 +135,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
                     "emissive_mask_texture", Sdf.ValueTypeNames.Asset
                 )
                 # Use the dynamically generated relative path for the emissive texture
-                emissive_rel_file_path = os.path.relpath(os.path.join(game_ready_assets_path, emissive_file_name), args.directory)
+                emissive_rel_file_path = os.path.relpath(os.path.join(os.path.dirname(file_name), emissive_file_name), args.directory)
                 emissive_mask_texture.Set(f".\{emissive_rel_file_path}")
                 enable_emission = shader_prim.CreateInput(
                     "enable_emission", Sdf.ValueTypeNames.Bool
@@ -154,7 +154,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
                     "metallic_texture", Sdf.ValueTypeNames.Asset
                 )
                 # Use the dynamically generated relative path for the metallic texture
-                metallic_rel_file_path = os.path.relpath(os.path.join(game_ready_assets_path, metallic_file_name), args.directory)
+                metallic_rel_file_path = os.path.relpath(os.path.join(os.path.dirname(file_name), metallic_file_name), args.directory)
                 metallic_texture.Set(f".\{metallic_rel_file_path}")
 
         if not suffix or suffix == "_normal":
@@ -164,7 +164,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
                     "normal_texture", Sdf.ValueTypeNames.Asset
                 )
                 # Use the dynamically generated relative path for the normal texture
-                normal_rel_file_path = os.path.relpath(os.path.join(game_ready_assets_path, normal_file_name), args.directory)
+                normal_rel_file_path = os.path.relpath(os.path.join(os.path.dirname(file_name), normal_file_name), args.directory)
                 normalmap_texture.Set(f".\{normal_rel_file_path}")
 
         if not suffix or suffix == "_rough":
@@ -174,7 +174,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
                     "roughness_texture", Sdf.ValueTypeNames.Asset
                 )
                 # Use the dynamically generated relative path for the roughness texture
-                roughness_rel_file_path = os.path.relpath(os.path.join(game_ready_assets_path, roughness_file_name), args.directory)
+                roughness_rel_file_path = os.path.relpath(os.path.join(os.path.dirname(file_name), roughness_file_name), args.directory)
                 reflectionroughness_texture.Set(f".\{roughness_rel_file_path}")
 
         # Connect shader output to material inputs
