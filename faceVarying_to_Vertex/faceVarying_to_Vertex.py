@@ -3,16 +3,27 @@ import logging
 import os
 import sys
 
-from pxr import Usd, UsdGeom, Gf
+from pxr import Usd, UsdGeom, Gf, Sdf
+
+ALIASES = {
+    "primvars:UVMap": ("primvars:st", Sdf.ValueTypeNames.Float2Array),
+    "primvars:UVChannel_1": ("primvars:st1", Sdf.ValueTypeNames.Float2Array),
+    "primvars:map1": ("primvars:st1", Sdf.ValueTypeNames.Float2Array),
+    # Add more aliases here
+}
 
 
 def convert_face_varying_to_vertex_interpolation(usd_file_path):
     stage = Usd.Stage.Open(usd_file_path)
-    mesh_prims = [prim for prim in stage.TraverseAll() if UsdGeom.Mesh(prim)]
+    mesh_prims = [prim for prim in stage.TraverseAll() if prim.IsA(UsdGeom.Mesh)]
     for prim in mesh_prims:
         mesh = UsdGeom.Mesh(prim)
         indices = prim.GetAttribute("faceVertexIndices")
         points = prim.GetAttribute("points")
+        
+        if not indices or not points:
+            continue  # Skip if the required attributes are missing
+        
         points_arr = points.Get()
 
         modified_points = [points_arr[i] for i in indices.Get()]
@@ -26,14 +37,26 @@ def convert_face_varying_to_vertex_interpolation(usd_file_path):
             if var.GetInterpolation() == UsdGeom.Tokens.faceVarying:
                 var.SetInterpolation(UsdGeom.Tokens.vertex)
 
-    logging.info(f"Mesh conversion performed on {usd_file_path}")
-    return stage
+            # Replace aliases with "float2[] primvars:st"
+            if var.GetName() in ALIASES:
+                new_name, new_type_name = ALIASES[var.GetName()]
+                new_var = primvar_api.GetPrimvar(new_name)
+                if new_var:
+                    new_var.Set(var.Get())
+                else:
+                    new_var = primvar_api.CreatePrimvar(new_name, new_type_name)
+                    new_var.Set(var.Get())
+                    new_var.SetInterpolation(UsdGeom.Tokens.vertex) # Set interpolation to vertex
+                
+                primvar_api.RemovePrimvar(var.GetBaseName())
 
+    return stage
 
 def convert_file_format(input_file, output_file):
     stage = Usd.Stage.Open(input_file)
     stage.Export(output_file)
     logging.info(f"File format conversion performed: {input_file} -> {output_file}")
+    return stage
 
 
 def process_folder(input_folder, output_folder, output_format):
@@ -47,7 +70,8 @@ def process_folder(input_folder, output_folder, output_format):
         stage = convert_face_varying_to_vertex_interpolation(input_file)
 
         if output_file.endswith(".usd") or output_file.endswith(".usda"):
-            convert_file_format(input_file, output_file)
+            stage = convert_file_format(input_file, output_file)
+            stage.Export(output_file)  # Export again using the output file path
 
 
 def main():
@@ -69,8 +93,8 @@ def main():
         stage = convert_face_varying_to_vertex_interpolation(input_path)
 
         if output_path.endswith(".usd") or output_path.endswith(".usda"):
-            convert_file_format(input_path, output_path)
-
+            stage = convert_file_format(input_path, output_path)
+            stage.Export(output_path)  # Export again using the output file path
 
 
 if __name__ == '__main__':
