@@ -67,20 +67,23 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
             # Extract only the file name from the absolute path
             name = os.path.basename(file_name)
             name, ext = os.path.splitext(name)
-            if "_" not in name or name.endswith("_diffuse"):
+            if "_" not in name or name.endswith("_diffuse") or name.endswith("_albedo"):
                 # Check if the generate_hashes argument is specified
                 if args.generate_hashes:
-                    key = generate_hashes(os.path.join(reference_directory, file_name))
+                    key = name.split("_")[0]  # Use the prefix of the diffuse file name as the key
+                    hash_value = generate_hashes(os.path.join(reference_directory, file_name))  # Generate hash for the diffuse file
                 else:
                     key = os.path.basename(name)
-                    # Check if the key contains a hash
-                    if not (key.isupper() and len(key) == 16):
+                    hash_value = key  # Use the original name as the hash value
+                    # Check if the key contains a hash or ends with _diffuse or _albedo
+                    if not (key.isupper() and len(key) == 16) and not (key.endswith("_diffuse") or key.endswith("_albedo")):
                         continue
-                # Remove the _diffuse suffix from the key
-                key = key.replace("_diffuse", "")
+                # Remove the _diffuse or _albedo suffix from the key and hash_value
+                key = key.replace("_diffuse", "").replace("_albedo", "")
+                hash_value = hash_value.replace("_diffuse", "").replace("_albedo", "")
                 # Get the relative path from the game ready assets path to the texture file
                 rel_file_path = os.path.relpath(file_name, args.directory)
-                targets[key] = rel_file_path
+                targets[key] = (rel_file_path, hash_value)
 
     # Create a new stage
     stage = Usd.Stage.CreateNew(usda_file_path)
@@ -92,7 +95,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
     looks_scope = UsdGeom.Scope.Define(stage, "/RootNode/Looks")
     
     added_targets = set()
-    for value, name in targets.items():
+    for value, (rel_file_path, hash_value) in targets.items():
         # Check if there is a corresponding texture file for the specified suffix
         if suffix and not any(
             file_name.endswith(f"{value}{suffix}.dds") for file_name in file_list
@@ -101,30 +104,33 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
             continue
         else:
             added_targets.add(value)
-            print(f"Adding texture {name} with hash: {value}")
+            print(f"Adding texture {rel_file_path} with hash: {hash_value}")
 
         # Add a material prim as a child of the Looks scope
         material_prim = UsdShade.Material.Define(
-            stage, f"/RootNode/Looks/mat_{value.upper()}"
+            stage, f"/RootNode/Looks/mat_{hash_value.upper()}"
         )
         material_prim.GetPrim().GetReferences().SetReferences([])
 
         # Set the shader attributes
         shader_prim = UsdShade.Shader.Define(
-            stage, f"/RootNode/Looks/mat_{value.upper()}/Shader"
+            stage, f"/RootNode/Looks/mat_{hash_value.upper()}/Shader"
         )
         shader_prim.CreateInput("info:mdl:sourceAsset", Sdf.ValueTypeNames.Asset).Set(
             "AperturePBR_Opacity.mdl"
         )
         shader_output = shader_prim.CreateOutput("output", Sdf.ValueTypeNames.Token)
 
-        if not suffix or suffix == "_diffuse":
+        if not suffix or suffix == "_diffuse" or suffix == "_albedo":
             diffuse_texture = shader_prim.CreateInput(
                 "diffuse_texture", Sdf.ValueTypeNames.Asset
             )
             # Use the dynamically generated relative path for the diffuse texture
-            diffuse_texture.Set(f".\{name}")
+            diffuse_texture.Set(f".\{rel_file_path}")
         
+# rest of function remains unchanged
+
+           
         # Process each type of texture
         if not suffix or suffix == "_emissive":
             emissive_file_name = f"{value}_emissive.dds"
