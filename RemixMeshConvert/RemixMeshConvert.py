@@ -54,9 +54,11 @@ def convert_face_varying_to_vertex_interpolation(usd_file_path):
     return stage
 
 
-def process_folder(input_folder, output_folder):
+def process_folder(input_folder, output_folder, output_extension=None):
     for file_name in os.listdir(input_folder):
         input_file = os.path.join(input_folder, file_name)
+        if output_extension:
+            file_name = os.path.splitext(file_name)[0] + '.' + output_extension
         output_file = os.path.join(output_folder, file_name)
 
         if not os.path.isfile(input_file):
@@ -72,16 +74,20 @@ def main():
     parser = argparse.ArgumentParser(description='Convert USD file formats and interpolation of meshes.')
     parser.add_argument('input', type=str, help='Input file or folder path')
     parser.add_argument('output', type=str, help='Output file or folder path')
+    parser.add_argument('-f', '--format', type=str, choices=['usd', 'usda'], help='Output file format (usd or usda)')
     args = parser.parse_args()
 
     input_path = args.input
     output_path = args.output
+    output_extension = args.format
 
     logging.basicConfig(level=logging.INFO, format='%(message)s')
 
     if os.path.isdir(input_path):
-        process_folder(input_path, output_path)
+        process_folder(input_path, output_path, output_extension)
     else:
+        if output_extension:
+            output_path = os.path.splitext(output_path)[0] + '.' + output_extension
         shutil.copy(input_path, output_path)  # Make a copy of the input file and rename it to the output file
         stage = convert_face_varying_to_vertex_interpolation(output_path)
         stage.Save()  # Modify the output file in place
