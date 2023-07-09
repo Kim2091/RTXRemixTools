@@ -1,4 +1,4 @@
-## faceVarying to Vertex
+## RemixMeshConvert
 *Based on a script originally written by E-man*
 
 $\color{#f7d26a}{\textsf{Please back up your usda files before running!}}$
@@ -7,11 +7,11 @@ $\color{#f7d26a}{\textsf{Please back up your usda files before running!}}$
 
 To convert a single file:
 
-`python faceVarying_to_vertex.py [input.usda] [output.usda]`
+`python RemixMeshConvert.py [input.usda] [output.usda]`
 
 To batch convert a folder:
 
-`python faceVarying_to_vertex.py path\to\input\folder path\to\output\folder -f [usd or usda]`
+`python RemixMeshConvert.py path\to\input\folder path\to\output\folder -f [usd or usda]`
 
 **Arguments:**
 

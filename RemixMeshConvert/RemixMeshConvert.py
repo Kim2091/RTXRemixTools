@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import shutil
 import sys
 
 from pxr import Usd, UsdGeom, Gf, Sdf
@@ -52,49 +53,39 @@ def convert_face_varying_to_vertex_interpolation(usd_file_path):
 
     return stage
 
-def convert_file_format(input_file, output_file):
-    stage = Usd.Stage.Open(input_file)
-    stage.Export(output_file)
-    logging.info(f"File format conversion performed: {input_file} -> {output_file}")
-    return stage
 
-
-def process_folder(input_folder, output_folder, output_format):
+def process_folder(input_folder, output_folder):
     for file_name in os.listdir(input_folder):
         input_file = os.path.join(input_folder, file_name)
-        output_file = os.path.join(output_folder, os.path.splitext(file_name)[0] + '.' + output_format)
+        output_file = os.path.join(output_folder, file_name)
 
         if not os.path.isfile(input_file):
             continue
 
-        stage = convert_face_varying_to_vertex_interpolation(input_file)
-
-        if output_file.endswith(".usd") or output_file.endswith(".usda"):
-            stage = convert_file_format(input_file, output_file)
-            stage.Export(output_file)  # Export again using the output file path
+        shutil.copy(input_file, output_file)  # Make a copy of the input file and rename it to the output file
+        stage = convert_face_varying_to_vertex_interpolation(output_file)
+        stage.Save()  # Modify the output file in place
+        logging.info(f"Processed file: {input_file} -> {output_file}")
 
 
 def main():
     parser = argparse.ArgumentParser(description='Convert USD file formats and interpolation of meshes.')
     parser.add_argument('input', type=str, help='Input file or folder path')
     parser.add_argument('output', type=str, help='Output file or folder path')
-    parser.add_argument('-f', '--output-format', type=str, choices=['usd', 'usda'], help='Output format when processing a folder')
     args = parser.parse_args()
 
     input_path = args.input
     output_path = args.output
-    output_format = args.output_format
 
     logging.basicConfig(level=logging.INFO, format='%(message)s')
 
     if os.path.isdir(input_path):
-        process_folder(input_path, output_path, output_format)
+        process_folder(input_path, output_path)
     else:
-        stage = convert_face_varying_to_vertex_interpolation(input_path)
-
-        if output_path.endswith(".usd") or output_path.endswith(".usda"):
-            stage = convert_file_format(input_path, output_path)
-            stage.Export(output_path)  # Export again using the output file path
+        shutil.copy(input_path, output_path)  # Make a copy of the input file and rename it to the output file
+        stage = convert_face_varying_to_vertex_interpolation(output_path)
+        stage.Save()  # Modify the output file in place
+        logging.info(f"Processed file: {input_path} -> {output_path}")
 
 
 if __name__ == '__main__':
