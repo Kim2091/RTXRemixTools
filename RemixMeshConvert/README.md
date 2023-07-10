@@ -19,6 +19,6 @@ To batch convert a folder:
 
 **Description:**
 
-This script takes USD files as input, converts the interpolation of all meshes in the given USD file from face-varying to vertex, and exports the modified stage to new USD files. It can process a single file or a folder of files, and also includes a dictionary of aliases for replacing specific primvar names with `float2[] primvars:st1`.
+This script takes USD files as input, makes a copy named as the output, converts the interpolation of all meshes in the given USD file from face-varying to vertex, and finally saves the modified stages to the new USD files. It can process a single file or a folder of files, and also includes a dictionary of aliases for replacing specific primvar names with `float2[] primvars:st1`.
 
 Please refer to `requirements.txt` for necessary Python libraries.
