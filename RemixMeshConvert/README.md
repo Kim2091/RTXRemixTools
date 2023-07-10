@@ -21,4 +21,6 @@ To batch convert a folder:
 
 This script takes USD files as input, makes a copy named as the output, converts the interpolation of all meshes in the given USD file from face-varying to vertex, and finally saves the modified stages to the new USD files. It can process a single file or a folder of files, and also includes a dictionary of aliases for replacing specific primvar names with `float2[] primvars:st1`.
 
+**For your final exports to use in-game, please save as USD! USDA files are very inefficient in comparison**
+
 Please refer to `requirements.txt` for necessary Python libraries.
