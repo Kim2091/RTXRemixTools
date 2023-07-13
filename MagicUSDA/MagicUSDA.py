@@ -116,9 +116,16 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
         shader_prim = UsdShade.Shader.Define(
             stage, f"/RootNode/Looks/mat_{hash_value.upper()}/Shader"
         )
-        shader_prim.CreateInput("info:mdl:sourceAsset", Sdf.ValueTypeNames.Asset).Set(
+        shader_prim.GetPrim().CreateAttribute("info:mdl:sourceAsset", Sdf.ValueTypeNames.Asset).Set(
             "AperturePBR_Opacity.mdl"
         )
+        shader_prim.GetPrim().CreateAttribute("info:implementationSource", Sdf.ValueTypeNames.Token).Set(
+            "sourceAsset"
+        )
+        shader_prim.GetPrim().CreateAttribute("info:mdl:sourceAsset:subIdentifier", Sdf.ValueTypeNames.Token).Set(
+            "AperturePBR_Opacity"
+        )
+
         shader_output = shader_prim.CreateOutput("output", Sdf.ValueTypeNames.Token)
 
         if not suffix or suffix == "_diffuse" or suffix == "_albedo":
@@ -141,7 +148,6 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
                     "emissive_mask_texture", Sdf.ValueTypeNames.Asset
                 )
                 # Use the dynamically generated relative path for the emissive texture
-
                 emissive_rel_file_path = os.path.relpath(os.path.join(os.path.dirname(file_name), emissive_file_name), args.directory)
                 emissive_mask_texture.Set(f".\{emissive_rel_file_path}")
                 enable_emission = shader_prim.CreateInput(
@@ -178,7 +184,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
             roughness_file_name = f"{value}_rough.dds"
             if any(file_path.endswith(roughness_file_name) for file_path in file_list):
                 reflectionroughness_texture = shader_prim.CreateInput(
-                    "roughness_texture", Sdf.ValueTypeNames.Asset
+                    "reflectionroughness_texture", Sdf.ValueTypeNames.Asset
                 )
                 # Use the dynamically generated relative path for the roughness texture
                 roughness_rel_file_path = os.path.relpath(os.path.join(os.path.dirname(file_name), roughness_file_name), args.directory)
