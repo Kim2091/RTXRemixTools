@@ -117,13 +117,13 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
             stage, f"/RootNode/Looks/mat_{hash_value.upper()}/Shader"
         )
         shader_prim.GetPrim().CreateAttribute("info:mdl:sourceAsset", Sdf.ValueTypeNames.Asset).Set(
-            "AperturePBR_Opacity.mdl"
+            f"{args.shader_type}.mdl"
         )
         shader_prim.GetPrim().CreateAttribute("info:implementationSource", Sdf.ValueTypeNames.Token).Set(
             "sourceAsset"
         )
         shader_prim.GetPrim().CreateAttribute("info:mdl:sourceAsset:subIdentifier", Sdf.ValueTypeNames.Token).Set(
-            "AperturePBR_Opacity"
+            f"{args.shader_type}"
         )
 
         shader_output = shader_prim.CreateOutput("output", Sdf.ValueTypeNames.Token)
@@ -134,10 +134,7 @@ def write_usda_file(args, file_list, suffix=None) -> [list, list]:
             )
             # Use the dynamically generated relative path for the diffuse texture
             diffuse_texture.Set(f".\{rel_file_path}")
-        
-# rest of function remains unchanged
-
-           
+   
         # Process each type of texture
         if not suffix or suffix == "_emissive":
             emissive_file_name = f"{value}_emissive.dds"
@@ -251,6 +248,7 @@ if __name__ == "__main__":
     parser.add_argument("-g", "--generate-hashes", action="store_true", help="Generates hashes for file names before the suffix")
     parser.add_argument("-m", "--multiple-files", action="store_true", help="Save multiple .usda files, one for each suffix type (except for diffuse)")
     parser.add_argument("-a", "--add-sublayers", action="store_true", help="Add sublayers made with -m to the mod.usda file. This argument only modifies the mod.usda file and does not affect any custom USDA file specified by the -o argument.")
+    parser.add_argument("-s", "--shader-type", default="AperturePBR_Opacity", choices=["AperturePBR_Opacity", "AperturePBR_Translucent"], help="Shader type")
     parser.add_argument("-r", "--reference-directory", help="Path to reference directory for diffuse texture hashes")
     args = parser.parse_args()
      
