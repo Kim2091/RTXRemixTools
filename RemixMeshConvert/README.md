@@ -1,7 +1,7 @@
 ## RemixMeshConvert
 *Based on a script originally written by E-man*
 
-$\color{#f7d26a}{\textsf{Please back up your usda files before running!}}$
+$\color{#f7d26a}{\textsf{Please back up your USD and USDA files before running!}}$
 
 **How to use this script:**
 
